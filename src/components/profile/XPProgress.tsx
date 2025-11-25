@@ -33,7 +33,7 @@ export const XPProgress = ({ solvedCount, totalRating }: XPProgressProps) => {
     <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5 text-yellow-500" />
+          <Zap className="h-5 w-5 text-primary" />
           Experience & Progress
         </CardTitle>
       </CardHeader>
@@ -61,7 +61,7 @@ export const XPProgress = ({ solvedCount, totalRating }: XPProgressProps) => {
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(progress, 100)}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 relative"
+              className="h-full bg-gradient-primary relative"
             >
               <motion.div
                 animate={{

@@ -21,7 +21,7 @@ export const AchievementsBadges = ({
       description: "Solved your first problem",
       icon: Trophy,
       unlocked: solvedCount >= 1,
-      color: "text-yellow-500",
+      color: "text-primary",
     },
     {
       id: "streak_5",
@@ -29,7 +29,7 @@ export const AchievementsBadges = ({
       description: "Maintained a 5-day solving streak",
       icon: Flame,
       unlocked: streakDays >= 5,
-      color: "text-orange-500",
+      color: "text-destructive",
     },
     {
       id: "rated_1300",
@@ -37,7 +37,7 @@ export const AchievementsBadges = ({
       description: "Achieved a rating of 1300 or higher",
       icon: Zap,
       unlocked: totalRating >= 1300,
-      color: "text-blue-500",
+      color: "text-primary",
     },
     {
       id: "hard_solver",
@@ -45,7 +45,7 @@ export const AchievementsBadges = ({
       description: "Successfully solved a hard problem",
       icon: Target,
       unlocked: hasHardSolved,
-      color: "text-red-500",
+      color: "text-accent",
     },
   ];
 

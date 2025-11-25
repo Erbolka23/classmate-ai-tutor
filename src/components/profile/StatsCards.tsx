@@ -33,11 +33,11 @@ export const StatsCards = ({
   };
 
   const stats = [
-    { icon: Trophy, value: totalSolved, label: "Total Solved", color: "text-yellow-500", bgColor: "bg-yellow-500/10" },
-    { icon: CheckCircle, value: `${correctPercentage}%`, label: "Correct Rate", color: "text-green-500", bgColor: "bg-green-500/10" },
-    { icon: Target, value: hardestRating, label: "Hardest Solved", color: "text-red-500", bgColor: "bg-red-500/10" },
-    { icon: Clock, value: formatDate(lastActivity), label: "Last Activity", color: "text-blue-500", bgColor: "bg-blue-500/10", isText: true },
-    { icon: Trophy, value: averageRating, label: "Avg Rating", color: "text-purple-500", bgColor: "bg-purple-500/10" },
+    { icon: Trophy, value: totalSolved, label: "Total Solved", color: "text-primary", bgColor: "bg-primary/10" },
+    { icon: CheckCircle, value: `${correctPercentage}%`, label: "Correct Rate", color: "text-accent", bgColor: "bg-accent/10" },
+    { icon: Target, value: hardestRating, label: "Hardest Solved", color: "text-destructive", bgColor: "bg-destructive/10" },
+    { icon: Clock, value: formatDate(lastActivity), label: "Last Activity", color: "text-primary", bgColor: "bg-primary/10", isText: true },
+    { icon: Trophy, value: averageRating, label: "Avg Rating", color: "text-secondary-foreground", bgColor: "bg-secondary" },
   ];
 
   return (
