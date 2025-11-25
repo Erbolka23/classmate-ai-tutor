@@ -25,7 +25,7 @@ export const StreakPanel = ({ currentStreak, maxStreak }: StreakPanelProps) => {
               repeatDelay: 1,
             }}
           >
-            <Flame className="h-5 w-5 text-orange-500" />
+            <Flame className="h-5 w-5 text-destructive" />
           </motion.div>
           Streak
         </CardTitle>
@@ -35,8 +35,9 @@ export const StreakPanel = ({ currentStreak, maxStreak }: StreakPanelProps) => {
           <div>
             <motion.div
               key={currentStreak}
-              initial={{ scale: 1.5, color: "#f97316" }}
-              animate={{ scale: 1, color: "inherit" }}
+              initial={{ scale: 1.5 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
               className="text-3xl font-bold text-foreground"
             >
               {currentStreak}
@@ -59,7 +60,7 @@ export const StreakPanel = ({ currentStreak, maxStreak }: StreakPanelProps) => {
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(streakPercentage, 100)}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-orange-500 to-red-500 relative"
+              className="h-full bg-gradient-danger relative"
             >
               <motion.div
                 animate={{
@@ -80,9 +81,9 @@ export const StreakPanel = ({ currentStreak, maxStreak }: StreakPanelProps) => {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="text-center py-2 px-3 bg-orange-500/10 border border-orange-500/20 rounded-lg"
+            className="text-center py-2 px-3 bg-destructive/10 border border-destructive/20 rounded-lg"
           >
-            <span className="text-orange-500 font-medium">🔥 {currentStreak} days strong!</span>
+            <span className="text-destructive font-medium">🔥 {currentStreak} days strong!</span>
           </motion.div>
         )}
       </CardContent>
