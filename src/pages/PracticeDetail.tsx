@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
-import { RatingPopup } from "@/components/RatingPopup";
+import { SubmitResultModal } from "@/components/practice/SubmitResultModal";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ interface Problem {
   statement: string;
   difficulty: string;
   rating: number;
+  correct_answer: string | null;
 }
 
 const PracticeDetail = () => {
@@ -29,8 +30,8 @@ const PracticeDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userAnswer, setUserAnswer] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showRatingPopup, setShowRatingPopup] = useState(false);
-  const [ratingData, setRatingData] = useState<any>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultData, setResultData] = useState<any>(null);
 
   useEffect(() => {
     loadProblem();
@@ -90,9 +91,23 @@ const PracticeDetail = () => {
         return;
       }
 
-      // For now, we mark all attempts as correct since we don't have the actual answer
-      // In a real app, you'd compare with the correct answer
-      const isCorrect = true; // TODO: Implement answer validation
+      // Validate answer against correct answer
+      const normalizeAnswer = (answer: string) => {
+        return answer.trim().toLowerCase().replace(/\s+/g, ' ');
+      };
+
+      const isCorrect = problem.correct_answer 
+        ? normalizeAnswer(userAnswer) === normalizeAnswer(problem.correct_answer)
+        : false;
+
+      if (!problem.correct_answer) {
+        toast({
+          title: "Error",
+          description: "This problem doesn't have a correct answer set.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Submit attempt
       const { data: attemptData, error: attemptError } = await supabase.functions.invoke(
@@ -109,13 +124,11 @@ const PracticeDetail = () => {
 
       if (attemptError) throw attemptError;
 
-      setRatingData(attemptData);
-      setShowRatingPopup(true);
-
-      toast({
-        title: "Success! 🎉",
-        description: `Rating ${attemptData.delta > 0 ? '+' : ''}${attemptData.delta}`,
+      setResultData({
+        ...attemptData,
+        isCorrect,
       });
+      setShowResultModal(true);
     } catch (error: any) {
       console.error('Error submitting answer:', error);
       toast({
@@ -227,21 +240,22 @@ const PracticeDetail = () => {
         </div>
       </main>
 
-      {/* Rating Popup */}
-      {ratingData && (
-        <RatingPopup
-          isOpen={showRatingPopup}
+      {/* Submit Result Modal */}
+      {resultData && (
+        <SubmitResultModal
+          isOpen={showResultModal}
           onClose={() => {
-            setShowRatingPopup(false);
-            navigate('/practice');
+            setShowResultModal(false);
+            if (resultData.isCorrect) {
+              navigate('/practice');
+            }
           }}
-          delta={ratingData.delta}
-          ratingBefore={ratingData.rating_before}
-          ratingAfter={ratingData.rating_after}
-          totalRating={ratingData.total_rating}
-          subjectRating={ratingData.subject_rating}
-          streakDays={ratingData.streak_days}
-          solvedCount={ratingData.solved_count}
+          isCorrect={resultData.isCorrect}
+          delta={resultData.delta}
+          ratingBefore={resultData.rating_before}
+          ratingAfter={resultData.rating_after}
+          streakDays={resultData.streak_days}
+          onNextProblem={() => navigate('/practice')}
         />
       )}
     </div>

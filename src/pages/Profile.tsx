@@ -1,26 +1,187 @@
+import { useState, useEffect } from "react";
 import { NavBar } from "@/components/NavBar";
-import { User } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { StreakPanel } from "@/components/profile/StreakPanel";
+import { StatsCards } from "@/components/profile/StatsCards";
+import { RecentAttempts } from "@/components/profile/RecentAttempts";
+import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
+import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
+  const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(true);
+  const [profileData, setProfileData] = useState<any>(null);
+  const [userRatings, setUserRatings] = useState<any>(null);
+  const [attempts, setAttempts] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    correctPercentage: 0,
+    hardestRating: 0,
+    averageRating: 0,
+    maxStreak: 0,
+    hasHardSolved: false,
+  });
+
+  useEffect(() => {
+    loadProfileData();
+  }, []);
+
+  const loadProfileData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Authentication Required",
+          description: "Please sign in to view your profile.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Load profile
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      // Load ratings
+      const { data: ratings, error: ratingsError } = await supabase
+        .from('user_ratings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (ratingsError) throw ratingsError;
+
+      // Load attempts with problem details
+      const { data: attemptsData, error: attemptsError } = await supabase
+        .from('problem_attempts')
+        .select(`
+          *,
+          problems (
+            title,
+            difficulty,
+            rating
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (attemptsError) throw attemptsError;
+
+      setProfileData(profile);
+      setUserRatings(ratings);
+      setAttempts(attemptsData || []);
+
+      // Calculate stats
+      if (attemptsData && attemptsData.length > 0) {
+        const correctAttempts = attemptsData.filter(a => a.is_correct).length;
+        const correctPercentage = Math.round((correctAttempts / attemptsData.length) * 100);
+        
+        const hardestRating = Math.max(...attemptsData
+          .filter(a => a.is_correct)
+          .map(a => a.problems?.rating || 0));
+        
+        const avgRating = Math.round(
+          attemptsData
+            .filter(a => a.is_correct)
+            .reduce((sum, a) => sum + (a.problems?.rating || 0), 0) / correctAttempts
+        ) || 0;
+
+        const hasHardSolved = attemptsData.some(a => 
+          a.is_correct && a.problems?.difficulty === 'hard'
+        );
+
+        setStats({
+          correctPercentage,
+          hardestRating,
+          averageRating: avgRating,
+          maxStreak: ratings?.streak_days || 0,
+          hasHardSolved,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load profile data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <main className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto space-y-6">
+            <Skeleton className="h-32 w-full" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Skeleton className="h-48 lg:col-span-2" />
+              <Skeleton className="h-48" />
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!profileData || !userRatings) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <NavBar />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Profile</h1>
-            <p className="text-muted-foreground">Your learning stats and achievements</p>
-          </div>
+        <div className="max-w-6xl mx-auto space-y-6">
+          <ProfileHeader
+            username={profileData.username || 'User'}
+            avatarUrl={profileData.avatar_url}
+            joinDate={profileData.created_at}
+            totalRating={userRatings.total_rating}
+            mathRating={userRatings.math_rating}
+            physicsRating={userRatings.physics_rating}
+            programmingRating={userRatings.programming_rating}
+          />
 
-          <Card className="p-12 text-center">
-            <User className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">Coming Soon</h3>
-            <p className="text-muted-foreground">
-              Your profile page is under construction. Soon you'll be able to view your stats, achievements, and learning progress!
-            </p>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <StatsCards
+                totalSolved={userRatings.solved_count}
+                correctPercentage={stats.correctPercentage}
+                hardestRating={stats.hardestRating}
+                lastActivity={userRatings.last_solved_at}
+                averageRating={stats.averageRating}
+              />
+
+              <RecentAttempts attempts={attempts} />
+            </div>
+
+            <div className="space-y-6">
+              <StreakPanel
+                currentStreak={userRatings.streak_days}
+                maxStreak={stats.maxStreak}
+              />
+
+              <AchievementsBadges
+                solvedCount={userRatings.solved_count}
+                streakDays={userRatings.streak_days}
+                totalRating={userRatings.total_rating}
+                hasHardSolved={stats.hasHardSolved}
+              />
+            </div>
+          </div>
         </div>
       </main>
     </div>
