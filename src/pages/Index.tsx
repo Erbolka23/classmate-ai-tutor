@@ -107,13 +107,13 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+        <div className="container mx-auto px-4 py-6 sm:py-8">
+          <div className="mx-auto max-w-[850px] flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-md">
               <BookOpen className="h-6 w-6 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">ClassMate AI</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">ClassMate AI</h1>
               <p className="text-sm text-muted-foreground">Your Smart Classmate</p>
             </div>
           </div>
@@ -121,11 +121,11 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mx-auto max-w-4xl space-y-6">
+      <main className="container mx-auto px-4 py-8 sm:py-12">
+        <div className="mx-auto max-w-[850px] space-y-8">
           {/* Input Section */}
-          <div className="rounded-xl bg-card p-6 shadow-[var(--shadow-card)] transition-shadow hover:shadow-[var(--shadow-elevated)]">
-            <div className="space-y-4">
+          <div className="rounded-2xl bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
+            <div className="space-y-5">
               <SubjectSelector value={subject} onChange={setSubject} />
               <ProblemInput value={problemText} onChange={setProblemText} />
               
@@ -164,9 +164,9 @@ const Index = () => {
 
           {/* Empty State */}
           {!explanation && !isExplaining && (
-            <div className="rounded-xl border-2 border-dashed border-border bg-muted/30 p-12 text-center">
-              <BookOpen className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-              <h3 className="mb-2 text-lg font-semibold text-foreground">Ready to Learn!</h3>
+            <div className="rounded-2xl border-2 border-dashed border-border bg-muted/40 p-12 sm:p-16 text-center">
+              <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
+              <h3 className="mb-2 text-xl font-semibold text-foreground">Ready to Learn!</h3>
               <p className="text-muted-foreground">
                 Enter a problem above and click "Explain Step by Step" to get started.
               </p>
