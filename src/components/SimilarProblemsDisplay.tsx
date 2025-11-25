@@ -11,7 +11,7 @@ interface SimilarProblemsDisplayProps {
 
 export const SimilarProblemsDisplay = ({ problems }: SimilarProblemsDisplayProps) => {
   return (
-    <div className="animate-in fade-in-50 duration-500">
+    <div className="animate-fade-slide-in">
       <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
