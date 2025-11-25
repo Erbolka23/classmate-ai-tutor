@@ -261,7 +261,7 @@
   }
   
   .hover-lift:hover {
-    @apply -translate-y-1 shadow-hover;
+    @apply -translate-y-1 shadow-lg;
   }
   
   .hover-scale:hover {
