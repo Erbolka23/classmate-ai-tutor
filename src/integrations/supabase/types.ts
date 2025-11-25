@@ -14,10 +14,180 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      problem_attempts: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          is_correct: boolean
+          problem_id: string
+          rating_after: number
+          rating_before: number
+          subject: string
+          user_answer: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          is_correct: boolean
+          problem_id: string
+          rating_after: number
+          rating_before: number
+          subject: string
+          user_answer?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          is_correct?: boolean
+          problem_id?: string
+          rating_after?: number
+          rating_before?: number
+          subject?: string
+          user_answer?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "problem_attempts_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      problems: {
+        Row: {
+          correct_answer: string | null
+          created_at: string
+          created_by: string | null
+          difficulty: string
+          id: string
+          rating: number
+          source: string | null
+          statement: string
+          subject: string
+          title: string
+        }
+        Insert: {
+          correct_answer?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty: string
+          id?: string
+          rating: number
+          source?: string | null
+          statement: string
+          subject: string
+          title: string
+        }
+        Update: {
+          correct_answer?: string | null
+          created_at?: string
+          created_by?: string | null
+          difficulty?: string
+          id?: string
+          rating?: number
+          source?: string | null
+          statement?: string
+          subject?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_ratings: {
+        Row: {
+          created_at: string
+          last_solved_at: string | null
+          math_rating: number
+          physics_rating: number
+          programming_rating: number
+          solved_count: number
+          streak_days: number
+          total_rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_solved_at?: string | null
+          math_rating?: number
+          physics_rating?: number
+          programming_rating?: number
+          solved_count?: number
+          streak_days?: number
+          total_rating?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          last_solved_at?: string | null
+          math_rating?: number
+          physics_rating?: number
+          programming_rating?: number
+          solved_count?: number
+          streak_days?: number
+          total_rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "leaderboard_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_ratings_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      leaderboard_view: {
+        Row: {
+          avatar_url: string | null
+          id: string | null
+          math_rating: number | null
+          physics_rating: number | null
+          programming_rating: number | null
+          solved_count: number | null
+          streak_days: number | null
+          total_rating: number | null
+          username: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
