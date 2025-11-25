@@ -12,9 +12,9 @@ interface ExplanationDisplayProps {
 
 export const ExplanationDisplay = ({ explanation }: ExplanationDisplayProps) => {
   return (
-    <div className="space-y-6 animate-in fade-in-50 duration-500">
+    <div className="space-y-6">
       {/* Simplified Problem */}
-      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
+      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl animate-fade-slide-in">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -29,7 +29,7 @@ export const ExplanationDisplay = ({ explanation }: ExplanationDisplayProps) => 
       </Card>
 
       {/* Steps */}
-      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
+      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl animate-fade-slide-in animation-delay-150">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
@@ -53,7 +53,7 @@ export const ExplanationDisplay = ({ explanation }: ExplanationDisplayProps) => 
       </Card>
 
       {/* Final Answer */}
-      <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 shadow-[var(--shadow-elevated)] rounded-2xl">
+      <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 shadow-[var(--shadow-elevated)] rounded-2xl animate-fade-slide-in animation-delay-300">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20">

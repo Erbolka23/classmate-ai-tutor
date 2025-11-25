@@ -4,6 +4,7 @@ import { SubjectSelector } from "@/components/SubjectSelector";
 import { ProblemInput } from "@/components/ProblemInput";
 import { ExplanationDisplay } from "@/components/ExplanationDisplay";
 import { SimilarProblemsDisplay } from "@/components/SimilarProblemsDisplay";
+import { ExplanationSkeleton } from "@/components/ExplanationSkeleton";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,8 +155,11 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Loading Skeleton */}
+          {isExplaining && <ExplanationSkeleton />}
+
           {/* Explanation Display */}
-          {explanation && <ExplanationDisplay explanation={explanation} />}
+          {explanation && !isExplaining && <ExplanationDisplay explanation={explanation} />}
 
           {/* Similar Problems Display */}
           {similarProblems.length > 0 && (
