@@ -5,11 +5,17 @@ import { StreakPanel } from "@/components/profile/StreakPanel";
 import { StatsCards } from "@/components/profile/StatsCards";
 import { RecentAttempts } from "@/components/profile/RecentAttempts";
 import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
+import { AnimatedSection } from "@/components/profile/AnimatedSection";
+import { LevelCard } from "@/components/profile/LevelCard";
+import { XPProgress } from "@/components/profile/XPProgress";
+import { RatingChart } from "@/components/profile/RatingChart";
+import { TrophyWall } from "@/components/profile/TrophyWall";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -69,7 +75,7 @@ const Profile = () => {
         `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(30);
 
       if (attemptsError) throw attemptsError;
 
@@ -169,45 +175,88 @@ const Profile = () => {
       <NavBar />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          <ProfileHeader
-            username={profileData.username || 'User'}
-            avatarUrl={profileData.avatar_url}
-            joinDate={profileData.created_at}
-            totalRating={userRatings.total_rating}
-            mathRating={userRatings.math_rating}
-            physicsRating={userRatings.physics_rating}
-            programmingRating={userRatings.programming_rating}
-          />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-6xl mx-auto space-y-6"
+        >
+          <AnimatedSection delay={0}>
+            <ProfileHeader
+              username={profileData.username || 'User'}
+              avatarUrl={profileData.avatar_url}
+              joinDate={profileData.created_at}
+              totalRating={userRatings.total_rating}
+              mathRating={userRatings.math_rating}
+              physicsRating={userRatings.physics_rating}
+              programmingRating={userRatings.programming_rating}
+            />
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.1}>
+            <LevelCard totalRating={userRatings.total_rating} />
+          </AnimatedSection>
+
+          <AnimatedSection delay={0.2}>
+            <XPProgress
+              solvedCount={userRatings.solved_count}
+              totalRating={userRatings.total_rating}
+            />
+          </AnimatedSection>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
-              <StatsCards
-                totalSolved={userRatings.solved_count}
-                correctPercentage={stats.correctPercentage}
-                hardestRating={stats.hardestRating}
-                lastActivity={userRatings.last_solved_at}
-                averageRating={stats.averageRating}
-              />
+              <AnimatedSection delay={0.3}>
+                <StatsCards
+                  totalSolved={userRatings.solved_count}
+                  correctPercentage={stats.correctPercentage}
+                  hardestRating={stats.hardestRating}
+                  lastActivity={userRatings.last_solved_at}
+                  averageRating={stats.averageRating}
+                />
+              </AnimatedSection>
 
-              <RecentAttempts attempts={attempts} />
+              <AnimatedSection delay={0.4}>
+                <RatingChart
+                  attempts={attempts.map(a => ({
+                    rating_after: a.rating_after,
+                    created_at: a.created_at,
+                  }))}
+                />
+              </AnimatedSection>
+
+              <AnimatedSection delay={0.6}>
+                <RecentAttempts attempts={attempts.slice(0, 10)} />
+              </AnimatedSection>
             </div>
 
             <div className="space-y-6">
-              <StreakPanel
-                currentStreak={userRatings.streak_days}
-                maxStreak={stats.maxStreak}
-              />
+              <AnimatedSection delay={0.5}>
+                <StreakPanel
+                  currentStreak={userRatings.streak_days}
+                  maxStreak={stats.maxStreak}
+                />
+              </AnimatedSection>
 
-              <AchievementsBadges
-                solvedCount={userRatings.solved_count}
-                streakDays={userRatings.streak_days}
-                totalRating={userRatings.total_rating}
-                hasHardSolved={stats.hasHardSolved}
-              />
+              <AnimatedSection delay={0.6}>
+                <AchievementsBadges
+                  solvedCount={userRatings.solved_count}
+                  streakDays={userRatings.streak_days}
+                  totalRating={userRatings.total_rating}
+                  hasHardSolved={stats.hasHardSolved}
+                />
+              </AnimatedSection>
             </div>
           </div>
-        </div>
+
+          <AnimatedSection delay={0.7}>
+            <TrophyWall
+              solvedCount={userRatings.solved_count}
+              streakDays={userRatings.streak_days}
+              totalRating={userRatings.total_rating}
+            />
+          </AnimatedSection>
+        </motion.div>
       </main>
     </div>
   );
