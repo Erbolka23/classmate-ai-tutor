@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.similar]
 verify_jwt = false
+
+[functions.submit_attempt]
+verify_jwt = false
