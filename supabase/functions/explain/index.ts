@@ -96,13 +96,21 @@ Subject context: ${subject}`;
 
     // Validate input as academic problem
     const isAcademicProblem = (text: string): boolean => {
-      const lowerText = text.toLowerCase();
+      const trimmed = text.trim();
+      if (trimmed.length < 1) return false;
+      
+      const lowerText = trimmed.toLowerCase();
       const academicKeywords = ['solve', 'calculate', 'find', 'prove', 'explain', 'equation', 'integral', 'derivative', 'function', 'algorithm', 'code', 'program', 'physics', 'force', 'velocity', 'решите', 'найдите', 'вычислите', 'докажите', 'уравнение', 'интеграл', 'производная', 'функция', 'алгоритм'];
       const hasNumbers = /\d/.test(text);
-      const hasMathSymbols = /[+\-*/=<>∫∑√π]/.test(text);
+      const hasMathSymbols = /[+\-*/=<>∫∑√π()[\]{}^]/.test(text);
       const hasAcademicKeyword = academicKeywords.some(keyword => lowerText.includes(keyword));
       
-      return (hasNumbers || hasMathSymbols || hasAcademicKeyword) && text.trim().length > 10;
+      // Allow short problems if they have math symbols or numbers (like "1+2")
+      // Require longer text only if no clear math/academic indicators
+      if (hasMathSymbols || hasNumbers) return true;
+      if (hasAcademicKeyword && trimmed.length >= 5) return true;
+      
+      return trimmed.length > 15;
     };
 
     if (!isAcademicProblem(problem_text)) {
