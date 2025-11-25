@@ -13,6 +13,16 @@ interface ExplanationResult {
   simplified_problem: string;
   steps: string[];
   final_answer: string;
+  difficulty?: string;
+  confidence?: string;
+  key_concept?: string;
+  common_mistakes?: string[];
+  substeps?: Array<{
+    title: string;
+    steps: string[];
+    result: string;
+  }>;
+  error?: string;
 }
 
 interface SimilarProblem {
@@ -49,6 +59,16 @@ const Index = () => {
       });
 
       if (error) throw error;
+
+      // Check if AI returned an error
+      if (data.error) {
+        toast({
+          title: "Invalid Input",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
+      }
 
       setExplanation(data);
       toast({
