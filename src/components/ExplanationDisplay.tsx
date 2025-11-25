@@ -12,36 +12,40 @@ interface ExplanationDisplayProps {
 
 export const ExplanationDisplay = ({ explanation }: ExplanationDisplayProps) => {
   return (
-    <div className="space-y-4 animate-in fade-in-50 duration-500">
+    <div className="space-y-6 animate-in fade-in-50 duration-500">
       {/* Simplified Problem */}
-      <Card className="border-primary/20 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Problem Breakdown</CardTitle>
+      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <CardTitle className="text-xl font-semibold">Problem Breakdown</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-foreground leading-relaxed">{explanation.simplified_problem}</p>
+          <p className="text-foreground leading-relaxed text-base">{explanation.simplified_problem}</p>
         </CardContent>
       </Card>
 
       {/* Steps */}
-      <Card className="border-accent/20 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <ListOrdered className="h-5 w-5 text-accent" />
-            <CardTitle className="text-lg">Step-by-Step Solution</CardTitle>
+      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <ListOrdered className="h-5 w-5 text-primary" />
+            </div>
+            <CardTitle className="text-xl font-semibold">Step-by-Step Solution</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <ol className="space-y-4">
+          <ol className="space-y-5">
             {explanation.steps.map((step, index) => (
-              <li key={index} className="flex gap-3">
-                <Badge className="mt-0.5 h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent text-accent-foreground">
+              <li key={index} className="flex gap-4">
+                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
                   {index + 1}
-                </Badge>
-                <p className="flex-1 text-foreground leading-relaxed">{step.replace(/^\d+\.\s*/, '')}</p>
+                </div>
+                <p className="flex-1 text-foreground leading-relaxed text-base pt-0.5">{step.replace(/^\d+\.\s*/, '')}</p>
               </li>
             ))}
           </ol>
@@ -49,15 +53,17 @@ export const ExplanationDisplay = ({ explanation }: ExplanationDisplayProps) => 
       </Card>
 
       {/* Final Answer */}
-      <Card className="border-accent/30 bg-gradient-to-br from-accent/5 to-accent/10 shadow-[var(--shadow-elevated)]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-accent" />
-            <CardTitle className="text-lg">Final Answer</CardTitle>
+      <Card className="border-accent/20 bg-gradient-to-br from-accent/5 to-accent/10 shadow-[var(--shadow-elevated)] rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/20">
+              <CheckCircle2 className="h-5 w-5 text-accent" />
+            </div>
+            <CardTitle className="text-xl font-semibold text-accent">Final Answer</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-lg font-semibold text-foreground">{explanation.final_answer}</p>
+          <p className="text-lg font-semibold text-foreground leading-relaxed">{explanation.final_answer}</p>
         </CardContent>
       </Card>
     </div>

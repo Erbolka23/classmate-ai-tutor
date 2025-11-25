@@ -12,11 +12,13 @@ interface SimilarProblemsDisplayProps {
 export const SimilarProblemsDisplay = ({ problems }: SimilarProblemsDisplayProps) => {
   return (
     <div className="animate-in fade-in-50 duration-500">
-      <Card className="border-primary/20 bg-card shadow-[var(--shadow-card)]">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">Practice Problems</CardTitle>
+      <Card className="border-border bg-card shadow-[var(--shadow-card)] rounded-2xl">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <Lightbulb className="h-5 w-5 text-primary" />
+            </div>
+            <CardTitle className="text-xl font-semibold">Practice Problems</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
@@ -24,17 +26,17 @@ export const SimilarProblemsDisplay = ({ problems }: SimilarProblemsDisplayProps
             {problems.map((problem, index) => (
               <div 
                 key={index} 
-                className="group rounded-lg border border-border bg-background p-4 transition-all hover:border-primary/50 hover:shadow-[var(--shadow-card)]"
+                className="group rounded-xl border border-border bg-muted/30 p-5 transition-all hover:border-primary/40 hover:shadow-[var(--shadow-card)] hover:bg-card"
               >
-                <div className="mb-2 flex items-center justify-between">
-                  <Badge variant="outline" className="text-xs">
+                <div className="mb-3 flex items-center justify-between">
+                  <Badge variant="secondary" className="text-xs font-semibold">
                     Problem {index + 1}
                   </Badge>
                 </div>
-                <p className="mb-3 text-sm text-foreground">{problem.problem}</p>
-                <div className="rounded-md bg-muted p-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-1">Answer:</p>
-                  <p className="text-sm text-foreground">{problem.answer}</p>
+                <p className="mb-4 text-sm text-foreground leading-relaxed">{problem.problem}</p>
+                <div className="rounded-lg bg-accent/5 border border-accent/20 p-3">
+                  <p className="text-xs font-semibold text-accent mb-1.5">Answer:</p>
+                  <p className="text-sm text-foreground leading-relaxed">{problem.answer}</p>
                 </div>
               </div>
             ))}
