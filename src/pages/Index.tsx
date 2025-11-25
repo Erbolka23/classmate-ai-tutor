@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { BookOpen, Sparkles, Lightbulb } from "lucide-react";
+import { useState, useEffect } from "react";
+import { BookOpen, Sparkles, Lightbulb, Moon, Sun } from "lucide-react";
 import { SubjectSelector } from "@/components/SubjectSelector";
 import { ProblemInput } from "@/components/ProblemInput";
 import { ExplanationDisplay } from "@/components/ExplanationDisplay";
 import { SimilarProblemsDisplay } from "@/components/SimilarProblemsDisplay";
 import { ExplanationSkeleton } from "@/components/ExplanationSkeleton";
+import { HistoryPanel, HistoryItem } from "@/components/HistoryPanel";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useTheme } from "@/contexts/ThemeContext";
 
 interface ExplanationResult {
   simplified_problem: string;
@@ -28,6 +30,7 @@ interface ExplanationResult {
 interface SimilarProblem {
   problem: string;
   answer: string;
+  difficulty?: string;
 }
 
 const Index = () => {
@@ -37,7 +40,32 @@ const Index = () => {
   const [similarProblems, setSimilarProblems] = useState<SimilarProblem[]>([]);
   const [isExplaining, setIsExplaining] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
   const { toast } = useToast();
+  const { theme, toggleTheme } = useTheme();
+
+  // Load history from localStorage
+  useEffect(() => {
+    const savedHistory = localStorage.getItem('classmate-history');
+    if (savedHistory) {
+      setHistory(JSON.parse(savedHistory));
+    }
+  }, []);
+
+  // Save to history
+  const addToHistory = (newExplanation: ExplanationResult) => {
+    const historyItem: HistoryItem = {
+      id: Date.now().toString(),
+      subject,
+      problem: problemText,
+      timestamp: Date.now(),
+      simplified_problem: newExplanation.simplified_problem
+    };
+
+    const newHistory = [historyItem, ...history].slice(0, 10); // Keep last 10
+    setHistory(newHistory);
+    localStorage.setItem('classmate-history', JSON.stringify(newHistory));
+  };
 
   const handleExplain = async () => {
     if (!problemText.trim()) {
@@ -71,6 +99,7 @@ const Index = () => {
       }
 
       setExplanation(data);
+      addToHistory(data);
       toast({
         title: "Explanation Ready! 🎓",
         description: "Step-by-step solution generated successfully.",
@@ -124,80 +153,118 @@ const Index = () => {
     }
   };
 
+  const loadHistoryItem = (item: HistoryItem) => {
+    setSubject(item.subject);
+    setProblemText(item.problem);
+    // Optionally auto-explain when loading from history
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+    localStorage.removeItem('classmate-history');
+    toast({
+      title: "History Cleared",
+      description: "All history items have been removed.",
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card shadow-sm">
-        <div className="container mx-auto px-4 py-6 sm:py-8">
-          <div className="mx-auto max-w-[850px] flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-md">
-              <BookOpen className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">ClassMate AI</h1>
-              <p className="text-sm text-muted-foreground">Your Smart Classmate</p>
+    <div className="min-h-screen bg-background flex w-full">
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <header className="border-b border-border bg-card shadow-sm">
+          <div className="container mx-auto px-4 py-6 sm:py-8">
+            <div className="mx-auto max-w-[850px] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-md">
+                  <BookOpen className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-foreground">ClassMate AI</h1>
+                  <p className="text-sm text-muted-foreground">Your Smart Classmate</p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                className="h-10 w-10 rounded-xl"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </Button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 sm:py-12">
-        <div className="mx-auto max-w-[850px] space-y-8">
-          {/* Input Section */}
-          <div className="rounded-2xl bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
-            <div className="space-y-5">
-              <SubjectSelector value={subject} onChange={setSubject} />
-              <ProblemInput value={problemText} onChange={setProblemText} />
-              
-              <div className="flex flex-wrap gap-3">
-                <Button 
-                  onClick={handleExplain}
-                  disabled={isExplaining}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  {isExplaining ? "Explaining..." : "Explain Step by Step"}
-                </Button>
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8 sm:py-12 flex-1">
+          <div className="mx-auto max-w-[850px] space-y-8">
+            {/* Input Section */}
+            <div className="rounded-2xl bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
+              <div className="space-y-5">
+                <SubjectSelector value={subject} onChange={setSubject} />
+                <ProblemInput value={problemText} onChange={setProblemText} />
                 
-                {explanation && (
+                <div className="flex flex-wrap gap-3">
                   <Button 
-                    onClick={handleGenerateSimilar}
-                    disabled={isGenerating}
-                    variant="outline"
+                    onClick={handleExplain}
+                    disabled={isExplaining}
                     className="flex-1 sm:flex-none"
                   >
-                    <Lightbulb className="mr-2 h-4 w-4" />
-                    {isGenerating ? "Generating..." : "Generate Similar Problems"}
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    {isExplaining ? "Explaining..." : "Explain Step by Step"}
                   </Button>
-                )}
+                  
+                  {explanation && (
+                    <Button 
+                      onClick={handleGenerateSimilar}
+                      disabled={isGenerating}
+                      variant="outline"
+                      className="flex-1 sm:flex-none"
+                    >
+                      <Lightbulb className="mr-2 h-4 w-4" />
+                      {isGenerating ? "Generating..." : "Generate Similar Problems"}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
+
+            {/* Loading Skeleton */}
+            {isExplaining && <ExplanationSkeleton />}
+
+            {/* Explanation Display */}
+            {explanation && !isExplaining && <ExplanationDisplay explanation={explanation} />}
+
+            {/* Similar Problems Display */}
+            {similarProblems.length > 0 && (
+              <SimilarProblemsDisplay problems={similarProblems} />
+            )}
+
+            {/* Empty State */}
+            {!explanation && !isExplaining && (
+              <div className="rounded-2xl border-2 border-dashed border-border bg-muted/40 p-12 sm:p-16 text-center">
+                <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
+                <h3 className="mb-2 text-xl font-semibold text-foreground">Ready to Learn!</h3>
+                <p className="text-muted-foreground">
+                  Enter a problem above and click "Explain Step by Step" to get started.
+                </p>
+              </div>
+            )}
           </div>
+        </main>
+      </div>
 
-          {/* Loading Skeleton */}
-          {isExplaining && <ExplanationSkeleton />}
-
-          {/* Explanation Display */}
-          {explanation && !isExplaining && <ExplanationDisplay explanation={explanation} />}
-
-          {/* Similar Problems Display */}
-          {similarProblems.length > 0 && (
-            <SimilarProblemsDisplay problems={similarProblems} />
-          )}
-
-          {/* Empty State */}
-          {!explanation && !isExplaining && (
-            <div className="rounded-2xl border-2 border-dashed border-border bg-muted/40 p-12 sm:p-16 text-center">
-              <BookOpen className="mx-auto mb-4 h-16 w-16 text-muted-foreground/50" />
-              <h3 className="mb-2 text-xl font-semibold text-foreground">Ready to Learn!</h3>
-              <p className="text-muted-foreground">
-                Enter a problem above and click "Explain Step by Step" to get started.
-              </p>
-            </div>
-          )}
-        </div>
-      </main>
+      {/* History Panel */}
+      <HistoryPanel
+        history={history}
+        onLoadItem={loadHistoryItem}
+        onClearHistory={clearHistory}
+      />
     </div>
   );
 };
