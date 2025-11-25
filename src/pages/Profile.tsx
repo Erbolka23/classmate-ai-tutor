@@ -6,8 +6,10 @@ import { StatsCards } from "@/components/profile/StatsCards";
 import { RecentAttempts } from "@/components/profile/RecentAttempts";
 import { AchievementsBadges } from "@/components/profile/AchievementsBadges";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { User } from "lucide-react";
 
 const Profile = () => {
   const { toast } = useToast();
@@ -32,11 +34,7 @@ const Profile = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        toast({
-          title: "Authentication Required",
-          description: "Please sign in to view your profile.",
-          variant: "destructive",
-        });
+        setIsLoading(false);
         return;
       }
 
@@ -136,7 +134,34 @@ const Profile = () => {
   }
 
   if (!profileData || !userRatings) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <NavBar />
+        <main className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center space-y-6">
+            <div className="flex justify-center">
+              <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center">
+                <User className="h-12 w-12 text-muted-foreground" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold text-foreground">Authentication Required</h2>
+              <p className="text-muted-foreground text-lg">
+                Please sign in to view your profile and track your progress.
+              </p>
+            </div>
+            <Button 
+              size="lg" 
+              onClick={() => window.location.href = '/auth'}
+              className="gap-2"
+            >
+              <User className="h-5 w-5" />
+              Go to Sign In
+            </Button>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
