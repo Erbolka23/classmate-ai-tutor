@@ -1,12 +1,66 @@
-import { Link, useLocation } from "react-router-dom";
-import { BookOpen, GraduationCap, Target, Trophy, User, Moon, Sun } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { BookOpen, GraduationCap, Target, Trophy, User, Moon, Sun, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export const NavBar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { toast } = useToast();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been successfully signed out.",
+      });
+      navigate("/tutor");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getUserInitials = () => {
+    if (user?.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return "U";
+  };
 
   const navItems = [
     { path: "/tutor", label: "Tutor", icon: GraduationCap },
@@ -51,19 +105,62 @@ export const NavBar = () => {
             })}
           </nav>
 
-          {/* Theme Toggle */}
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={toggleTheme}
-            className="h-10 w-10 rounded-xl"
-          >
-            {theme === 'dark' ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
+          {/* Auth & Theme Controls */}
+          <div className="flex items-center gap-2">
+            {!loading && (
+              <>
+                {user ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="gap-2 h-10">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs bg-primary text-primary-foreground">
+                            {getUserInitials()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="hidden md:inline text-sm">
+                          {user.email?.split('@')[0]}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => navigate("/profile")}>
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleSignOut}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Button
+                    variant="default"
+                    onClick={() => navigate("/auth")}
+                    className="gap-2"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Sign In
+                  </Button>
+                )}
+              </>
             )}
-          </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-10 w-10 rounded-xl"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
