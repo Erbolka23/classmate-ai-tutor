@@ -43,9 +43,11 @@ const Leaderboard = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">Leaderboard</h1>
-            <p className="text-muted-foreground">Top performers in ClassMate AI</p>
+          <div className="mb-8 text-center">
+            <h1 className="text-5xl font-bold text-foreground mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              🏆 Leaderboard
+            </h1>
+            <p className="text-muted-foreground text-lg">Top performers in ClassMate AI</p>
           </div>
 
           {isLoading ? (

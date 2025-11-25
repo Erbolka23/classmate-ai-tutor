@@ -89,18 +89,20 @@ const Practice = () => {
       <NavBar />
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Practice Library</h1>
-          <p className="text-muted-foreground">Solve problems to improve your rating</p>
+        <div className="mb-8 text-center">
+          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            🎯 Practice Library
+          </h1>
+          <p className="text-muted-foreground text-lg">Solve problems to improve your rating</p>
         </div>
 
         <div className="grid lg:grid-cols-[280px_1fr] gap-8">
           {/* Filters Sidebar */}
           <aside className="space-y-6">
-            <Card className="p-6">
+            <Card className="p-6 rounded-2xl shadow-lg border-2">
               <div className="flex items-center gap-2 mb-6">
                 <Filter className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold text-foreground">Filters</h2>
+                <h2 className="text-xl font-bold text-foreground">Filters</h2>
               </div>
 
               <div className="space-y-6">
@@ -194,7 +196,7 @@ const Practice = () => {
                 {problems.map((problem) => (
                   <Card
                     key={problem.id}
-                    className="p-6 hover:shadow-[var(--shadow-hover)] transition-shadow cursor-pointer"
+                    className="p-6 rounded-2xl hover-lift active-press cursor-pointer shadow-md"
                     onClick={() => navigate(`/practice/${problem.id}`)}
                   >
                     <div className="flex items-start justify-between gap-4 mb-3">

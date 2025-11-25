@@ -166,8 +166,16 @@ const Tutor = () => {
 
       <main className="container mx-auto px-4 py-8 sm:py-12">
         <div className="mx-auto max-w-[850px] space-y-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              ✨ AI Tutor
+            </h1>
+            <p className="text-muted-foreground text-lg">Get step-by-step explanations for any problem</p>
+          </div>
+
           {/* Input Section */}
-          <div className="rounded-2xl bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
+          <div className="rounded-3xl bg-card p-6 sm:p-8 shadow-elevated border-2">
             <div className="space-y-5">
               <SubjectSelector value={subject} onChange={setSubject} />
               <ProblemInput value={problemText} onChange={setProblemText} />
@@ -175,9 +183,10 @@ const Tutor = () => {
               <Button 
                 onClick={handleExplain}
                 disabled={isExplaining}
-                className="w-full sm:w-auto"
+                size="lg"
+                className="w-full sm:w-auto text-lg"
               >
-                <Sparkles className="mr-2 h-4 w-4" />
+                <Sparkles className="mr-2 h-5 w-5" />
                 {isExplaining ? "Explaining..." : "Explain Step by Step"}
               </Button>
             </div>
@@ -192,8 +201,8 @@ const Tutor = () => {
               <ExplanationDisplay explanation={explanation} />
               
               {/* Action Buttons */}
-              <div className="rounded-2xl bg-card p-6 shadow-[var(--shadow-card)]">
-                <h3 className="text-lg font-semibold text-foreground mb-4">
+              <div className="rounded-3xl bg-card p-6 shadow-elevated border-2">
+                <h3 className="text-xl font-bold text-foreground mb-4">
                   Did you understand the solution?
                 </h3>
                 <div className="flex flex-wrap gap-3">

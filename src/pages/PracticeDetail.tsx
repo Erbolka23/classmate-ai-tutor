@@ -190,7 +190,7 @@ const PracticeDetail = () => {
           </Button>
 
           {/* Problem Card */}
-          <Card className="p-8">
+          <Card className="p-8 rounded-3xl shadow-elevated border-2">
             <div className="flex items-start justify-between gap-4 mb-6">
               <div className="flex-1">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
@@ -230,9 +230,10 @@ const PracticeDetail = () => {
               <Button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className="w-full sm:w-auto"
+                size="lg"
+                className="w-full sm:w-auto text-lg"
               >
-                <Send className="mr-2 h-4 w-4" />
+                <Send className="mr-2 h-5 w-5" />
                 {isSubmitting ? "Submitting..." : "Submit Answer"}
               </Button>
             </div>
