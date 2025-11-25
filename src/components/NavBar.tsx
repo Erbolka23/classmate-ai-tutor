@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BookOpen, GraduationCap, Target, Trophy, User, Moon, Sun, LogOut, LogIn, Settings } from "lucide-react";
+import { BookOpen, GraduationCap, Target, Trophy, User, Moon, Sun, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
@@ -67,7 +67,6 @@ export const NavBar = () => {
     { path: "/practice", label: "Practice", icon: Target },
     { path: "/leaderboard", label: "Leaderboard", icon: Trophy },
     { path: "/profile", label: "Profile", icon: User },
-    { path: "/admin", label: "Admin", icon: Settings },
   ];
 
   return (
