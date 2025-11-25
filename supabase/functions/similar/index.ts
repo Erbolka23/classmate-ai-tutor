@@ -29,23 +29,27 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert educational tutor specializing in ${subject}. Generate 4 similar practice problems based on the given problem. Each problem should:
-- Test the same concepts and skills
-- Have similar difficulty level
-- Be slightly different to provide good practice
-- Include a brief answer
+    const systemPrompt = `You are ClassMate AI, a friendly and precise educational tutor specializing in ${subject}.
+Your duties:
+1) Generate exactly 4 similar practice problems based on the original problem.
+2) Each problem should test the same concepts and have similar difficulty.
+3) Provide short, clear answers for each problem.
+4) Never reveal chain-of-thought — only provide educational content.
+5) Follow the subject context strictly.
+6) Detect language automatically: if the input is Russian, generate problems in Russian; if English, generate in English. Never mix languages.
+7) Keep problems concise but educational.
 
-Format your response as JSON with this structure:
+You MUST respond with a valid JSON object in this exact format:
 {
   "problems": [
-    {
-      "problem": "The problem statement",
-      "answer": "Brief answer or solution approach"
-    }
+    {"problem": "Problem statement 1", "answer": "Short answer 1"},
+    {"problem": "Problem statement 2", "answer": "Short answer 2"},
+    {"problem": "Problem statement 3", "answer": "Short answer 3"},
+    {"problem": "Problem statement 4", "answer": "Short answer 4"}
   ]
 }
 
-Generate exactly 4 problems.`;
+Generate exactly 4 problems. Ensure the output is valid JSON. Do not include markdown code blocks or any text outside the JSON object.`;
 
     console.log('Calling Lovable AI for similar problems:', { subject, problem_text: problem_text.substring(0, 100) });
 
@@ -59,7 +63,7 @@ Generate exactly 4 problems.`;
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Original problem: ${problem_text}` }
+          { role: 'user', content: `Original problem: ${problem_text}\n\nPlease generate 4 similar practice problems with brief answers in the same language as the original problem.` }
         ],
         temperature: 0.8,
       }),
