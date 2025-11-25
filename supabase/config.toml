@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.submit_attempt]
 verify_jwt = false
+
+[functions.fill_answers]
+verify_jwt = false
