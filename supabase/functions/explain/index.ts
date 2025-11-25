@@ -29,25 +29,92 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are ClassMate AI, a friendly and precise educational tutor specializing in ${subject}.
-Your duties:
-1) Restate the student's problem in simpler and clearer words.
-2) Solve the problem step-by-step with numbered steps.
-3) Give the final answer separately.
-4) Never reveal chain-of-thought — only provide short logical explanations.
-5) Output must be clean, structured, and formatted.
-6) Follow the subject context strictly.
-7) Detect language automatically: if the input is Russian, respond in Russian; if English, respond in English. Never mix languages.
-8) Keep explanations concise but educational.
+    const systemPrompt = `You are ClassMate AI, an educational problem-solving assistant.
+Your job is to analyze, explain, and solve academic tasks in math, physics, and programming.
+You MUST ALWAYS return strict JSON only, no additional text.
 
-You MUST respond with a valid JSON object in this exact format:
+1. LANGUAGE DETECTION
+Detect the language of the user's input automatically:
+- If >60% Russian → respond entirely in Russian
+- If >60% English → respond entirely in English
+- Never mix languages
+- Use warm, friendly, teacher-like tone
+
+2. INPUT VALIDATION
+If the user input is not an academic problem (e.g., greetings, random text, jokes), respond with:
 {
-  "simplified_problem": "A single concise paragraph restating the problem clearly",
-  "steps": ["Step 1: explanation", "Step 2: explanation", "Step 3: explanation"],
-  "final_answer": "Plain text final answer without additional wording"
+  "error": "Please enter a valid educational problem in math, physics, or programming."
 }
 
-Ensure the output is valid JSON. Do not include markdown code blocks or any text outside the JSON object.`;
+Valid problems include: equations, integrals, derivatives, word problems, physics calculations, algorithms, coding tasks.
+
+3. MULTI-STEP CHAINING
+If the problem contains multiple sub-problems:
+- Detect sub-problems
+- Solve them one by one
+- Include a "substeps" array explaining each mini-step
+- Still produce a single final answer
+
+4. OUTPUT FORMAT (STRICT JSON)
+ALWAYS return a JSON object:
+{
+  "simplified": "string - Rewrite the problem in simpler language, same target language",
+  "steps": ["step1", "step2", "..."] - Clear, logical, numbered solution steps. One concept per step,
+  "final_answer": "string - Only the direct answer (number, expression, explanation)",
+  "difficulty": "easy | medium | hard",
+  "confidence": "0-100%",
+  "key_concept": "string - 1-3 sentences describing the main rule or formula used",
+  "common_mistakes": ["mistake1", "mistake2"] - 2-3 typical mistakes students make,
+  "substeps": [
+    {
+      "title": "string",
+      "steps": ["substep1", "substep2"],
+      "result": "string"
+    }
+  ] - Only if the problem has multiple parts, otherwise return []
+}
+
+Difficulty rules:
+- EASY → basic algebra, basic arithmetic
+- MEDIUM → quadratic equations, derivatives, integrals, mid-level physics
+- HARD → advanced integrals, multi-step reasoning, algorithmic optimization
+
+Rules:
+- JSON must be valid
+- No markdown code blocks
+- No extra comments
+- No explanations outside JSON
+- If JSON formatting fails, automatically fix and return valid JSON
+
+5. BEHAVIOR RULES
+- Never give irrelevant text
+- Never lecture unless asked
+- Keep answers short but complete
+- If unsure → still provide best attempt, with lower confidence
+
+Subject context: ${subject}`;
+
+    // Validate input as academic problem
+    const isAcademicProblem = (text: string): boolean => {
+      const lowerText = text.toLowerCase();
+      const academicKeywords = ['solve', 'calculate', 'find', 'prove', 'explain', 'equation', 'integral', 'derivative', 'function', 'algorithm', 'code', 'program', 'physics', 'force', 'velocity', 'решите', 'найдите', 'вычислите', 'докажите', 'уравнение', 'интеграл', 'производная', 'функция', 'алгоритм'];
+      const hasNumbers = /\d/.test(text);
+      const hasMathSymbols = /[+\-*/=<>∫∑√π]/.test(text);
+      const hasAcademicKeyword = academicKeywords.some(keyword => lowerText.includes(keyword));
+      
+      return (hasNumbers || hasMathSymbols || hasAcademicKeyword) && text.trim().length > 10;
+    };
+
+    if (!isAcademicProblem(problem_text)) {
+      return new Response(
+        JSON.stringify({ 
+          error: problem_text.match(/[а-яА-Я]/) 
+            ? 'Пожалуйста, введите корректную учебную задачу по математике, физике или программированию.'
+            : 'Please enter a valid educational problem in math, physics, or programming.'
+        }), 
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Calling Lovable AI for explanation:', { subject, problem_text: problem_text.substring(0, 100) });
 
@@ -109,6 +176,20 @@ Ensure the output is valid JSON. Do not include markdown code blocks or any text
       // Remove markdown code blocks if present
       const cleanedMessage = aiMessage.replace(/```json\n?|\n?```/g, '').trim();
       parsedResponse = JSON.parse(cleanedMessage);
+      
+      // Check if AI returned an error
+      if (parsedResponse.error) {
+        return new Response(
+          JSON.stringify(parsedResponse), 
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      // Map new field names to old ones for backward compatibility
+      if (parsedResponse.simplified && !parsedResponse.simplified_problem) {
+        parsedResponse.simplified_problem = parsedResponse.simplified;
+      }
+      
     } catch (parseError) {
       console.error('Failed to parse AI response as JSON:', parseError);
       console.error('AI response:', aiMessage);
@@ -117,7 +198,12 @@ Ensure the output is valid JSON. Do not include markdown code blocks or any text
       parsedResponse = {
         simplified_problem: problem_text,
         steps: aiMessage.split('\n').filter((line: string) => line.trim()).map((line: string, idx: number) => `${idx + 1}. ${line}`),
-        final_answer: "See steps above for the complete solution."
+        final_answer: "See steps above for the complete solution.",
+        difficulty: "medium",
+        confidence: "50%",
+        key_concept: "Unable to parse AI response",
+        common_mistakes: [],
+        substeps: []
       };
     }
 
