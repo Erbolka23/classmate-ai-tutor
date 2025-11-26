@@ -94,23 +94,29 @@ Rules:
 
 Subject context: ${subject}`;
 
-    // Validate input as academic problem
+    // Validate input as academic problem - more permissive, let AI decide
     const isAcademicProblem = (text: string): boolean => {
       const trimmed = text.trim();
-      if (trimmed.length < 1) return false;
+      
+      // Reject only if too short or clearly non-academic
+      if (trimmed.length < 2) return false;
       
       const lowerText = trimmed.toLowerCase();
-      const academicKeywords = ['solve', 'calculate', 'find', 'prove', 'explain', 'equation', 'integral', 'derivative', 'function', 'algorithm', 'code', 'program', 'physics', 'force', 'velocity', 'решите', 'найдите', 'вычислите', 'докажите', 'уравнение', 'интеграл', 'производная', 'функция', 'алгоритм'];
-      const hasNumbers = /\d/.test(text);
-      const hasMathSymbols = /[+\-*/=<>∫∑√π()[\]{}^]/.test(text);
-      const hasAcademicKeyword = academicKeywords.some(keyword => lowerText.includes(keyword));
       
-      // Allow short problems if they have math symbols or numbers (like "1+2")
-      // Require longer text only if no clear math/academic indicators
-      if (hasMathSymbols || hasNumbers) return true;
-      if (hasAcademicKeyword && trimmed.length >= 5) return true;
+      // Reject obvious greetings and non-academic phrases
+      const nonAcademicPhrases = [
+        'hello', 'hi', 'hey', 'привет', 'здравствуй', 'добрый день',
+        'how are you', 'как дела', 'what\'s up', 'sup'
+      ];
       
-      return trimmed.length > 15;
+      const isGreeting = nonAcademicPhrases.some(phrase => 
+        lowerText === phrase || lowerText.startsWith(phrase + ' ')
+      );
+      
+      if (isGreeting) return false;
+      
+      // Accept everything else - let AI validate academic content
+      return true;
     };
 
     if (!isAcademicProblem(problem_text)) {
