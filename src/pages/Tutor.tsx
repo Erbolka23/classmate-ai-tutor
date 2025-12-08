@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 import { SubjectSelector } from "@/components/SubjectSelector";
@@ -27,6 +28,7 @@ interface ExplanationResult {
 }
 
 const Tutor = () => {
+  const location = useLocation();
   const [subject, setSubject] = useState("Math");
   const [problemText, setProblemText] = useState("");
   const [explanation, setExplanation] = useState<ExplanationResult | null>(null);
@@ -35,6 +37,17 @@ const Tutor = () => {
   const [showRatingPopup, setShowRatingPopup] = useState(false);
   const [ratingData, setRatingData] = useState<any>(null);
   const { toast } = useToast();
+
+  // Handle pre-filled problem from navigation (Practice Again)
+  useEffect(() => {
+    const state = location.state as { problem?: string; subject?: string } | null;
+    if (state?.problem) {
+      setProblemText(state.problem);
+    }
+    if (state?.subject) {
+      setSubject(state.subject.charAt(0).toUpperCase() + state.subject.slice(1));
+    }
+  }, [location.state]);
 
   const handleExplain = async () => {
     if (!problemText.trim()) {
@@ -70,6 +83,25 @@ const Tutor = () => {
         title: "Explanation Ready! 🎓",
         description: "Step-by-step solution generated successfully.",
       });
+
+      // Save to user_recent_queries (non-blocking)
+      const saveRecentQuery = async () => {
+        try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            await supabase.from('user_recent_queries').insert({
+              user_id: user.id,
+              subject: subject.toLowerCase(),
+              original_problem: problemText,
+              simplified_problem: data.simplified_problem || null,
+            });
+          }
+        } catch (saveError) {
+          console.error('Failed to save recent query:', saveError);
+        }
+      };
+      saveRecentQuery();
+
     } catch (error: any) {
       console.error('Error explaining problem:', error);
       toast({
