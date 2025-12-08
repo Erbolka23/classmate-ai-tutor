@@ -1,0 +1,84 @@
+/* MathLive Custom Styles for ClassMate AI */
+
+/* Base math-field styling */
+math-field {
+  display: block;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  --hue: 172;
+  --primary: hsl(172 66% 50%);
+  --caret-color: hsl(172 66% 50%);
+  --selection-background-color: hsl(172 66% 50% / 0.2);
+  --selection-color: inherit;
+  --placeholder-color: hsl(215 16% 47%);
+  --smart-fence-color: hsl(172 66% 50%);
+  --highlight-inactive-color: hsl(172 66% 50% / 0.1);
+  --text-font-family: 'Inter', sans-serif;
+}
+
+/* Dark mode adjustments */
+.dark math-field {
+  --caret-color: hsl(172 66% 60%);
+  --selection-background-color: hsl(172 66% 50% / 0.3);
+  --placeholder-color: hsl(215 20% 65%);
+  --smart-fence-color: hsl(172 66% 60%);
+  --highlight-inactive-color: hsl(172 66% 50% / 0.15);
+}
+
+/* Focus state */
+math-field:focus-within {
+  outline: none;
+}
+
+/* Keyboard styling overrides */
+math-field::part(virtual-keyboard-toggle) {
+  display: none;
+}
+
+/* Menu styling */
+math-field::part(menu-container) {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* Placeholder styling */
+math-field::part(placeholder) {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.7;
+}
+
+/* Hide scrollbar in toolbar */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Math toolbar button animations */
+@keyframes toolbar-button-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.math-toolbar-btn {
+  animation: toolbar-button-enter 0.2s ease-out forwards;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  math-field {
+    font-size: 1rem;
+    min-height: 100px;
+  }
+}
