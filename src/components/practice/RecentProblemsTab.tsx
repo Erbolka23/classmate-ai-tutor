@@ -19,8 +19,10 @@ interface RecentQuery {
 
 interface SimilarProblem {
   problem: string;
-  answer: string;
-  difficulty?: string;
+  solution?: string;
+  steps?: string;
+  subject?: string;
+  answer?: string;
 }
 
 export const RecentProblemsTab = () => {
@@ -85,11 +87,14 @@ export const RecentProblemsTab = () => {
 
       if (error) throw error;
 
-      const tasks = data?.tasks || [];
-      const mappedProblems = tasks.map((t: any) => ({
-        problem: t.task || t.problem || '',
+      // Handle both old format (tasks array) and new format (problems array)
+      const items = data?.problems || data?.tasks || [];
+      const mappedProblems = items.map((t: any) => ({
+        problem: t.problem || t.task || '',
+        solution: t.solution || '',
+        steps: t.steps || '',
+        subject: t.subject || query.subject,
         answer: t.answer || '',
-        difficulty: t.difficulty,
       }));
       setSimilarProblems(mappedProblems);
     } catch (error: any) {

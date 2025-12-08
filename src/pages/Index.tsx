@@ -29,8 +29,10 @@ interface ExplanationResult {
 
 interface SimilarProblem {
   problem: string;
-  answer: string;
-  difficulty?: string;
+  solution?: string;
+  steps?: string;
+  subject?: string;
+  answer?: string;
 }
 
 const Index = () => {
