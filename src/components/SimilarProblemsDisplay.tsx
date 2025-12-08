@@ -17,18 +17,18 @@ interface SimilarProblemsDisplayProps {
   originalProblem?: string;
 }
 
-const getDifficultyVariant = (difficulty?: string): "default" | "secondary" | "destructive" => {
-  if (difficulty === 'easy') return 'default';
-  if (difficulty === 'hard') return 'destructive';
-  return 'secondary';
-};
-
-const normalizeAnswer = (answer: string): string => {
-  return answer
-    .toLowerCase()
+// Enhanced normalize function for answer comparison
+const normalize = (str: string): string => {
+  return str
+    .toString()
     .trim()
+    .replace(/\\cdot/g, '*')
+    .replace(/\\times/g, '*')
+    .replace(/\\div/g, '/')
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1)/($2)')
     .replace(/\s+/g, '')
-    .replace(/,/g, '.');
+    .replace(/,/g, '.')
+    .toLowerCase();
 };
 
 export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarProblemsDisplayProps) => {
@@ -44,7 +44,7 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
   const checkAnswer = (index: number, problem: SimilarProblemsDisplayProps['problems'][0]) => {
     const userAnswer = userAnswers[index] || '';
     const correctAnswer = problem.solution || problem.answer || '';
-    const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
+    const isCorrect = normalize(userAnswer) === normalize(correctAnswer);
     
     setResults(prev => {
       const newResults = { ...prev, [index]: isCorrect };
@@ -137,20 +137,25 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
                         disabled={isChecked || !userAnswers[index]?.trim()}
                         className="shrink-0"
                       >
-                        Check
+                        Check My Answer
                       </Button>
                     </div>
+
+                    {/* Success Message */}
+                    {result === true && (
+                      <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 rounded-xl shadow-sm animate-fade-in border border-green-200 dark:border-green-800">
+                        Correct! 🎉 Great job!
+                      </div>
+                    )}
                     
+                    {/* Error Message */}
                     {result === false && (
-                      <div className="rounded-lg bg-accent/10 border border-accent/20 p-3 animate-fade-in space-y-2">
-                        <div>
-                          <p className="text-xs font-semibold text-muted-foreground mb-1">Correct answer:</p>
-                          <p className="text-sm text-foreground font-medium">{correctAnswer}</p>
-                        </div>
+                      <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-xl shadow-sm animate-fade-in border border-red-200 dark:border-red-800 space-y-2">
+                        <p>Incorrect. The correct answer is: <strong>{correctAnswer}</strong></p>
                         {problem.steps && (
-                          <div>
-                            <p className="text-xs font-semibold text-muted-foreground mb-1">Explanation:</p>
-                            <p className="text-sm text-muted-foreground">{problem.steps}</p>
+                          <div className="pt-2 border-t border-red-200 dark:border-red-800">
+                            <p className="text-xs font-semibold mb-1">Explanation:</p>
+                            <p className="text-sm opacity-90">{problem.steps}</p>
                           </div>
                         )}
                       </div>
