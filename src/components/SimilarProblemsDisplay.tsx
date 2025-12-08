@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 interface SimilarProblemsDisplayProps {
   problems: {
     problem: string;
-    answer: string;
-    difficulty?: string;
+    solution?: string;
+    steps?: string;
+    subject?: string;
+    answer?: string;
   }[];
   originalProblem?: string;
 }
@@ -39,8 +41,9 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
     setUserAnswers(prev => ({ ...prev, [index]: value }));
   };
 
-  const checkAnswer = (index: number, correctAnswer: string) => {
+  const checkAnswer = (index: number, problem: SimilarProblemsDisplayProps['problems'][0]) => {
     const userAnswer = userAnswers[index] || '';
+    const correctAnswer = problem.solution || problem.answer || '';
     const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
     
     setResults(prev => {
@@ -76,8 +79,8 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             {problems.map((problem, index) => {
               const result = results[index];
-              const difficulty = problem.difficulty || 'medium';
               const isChecked = result !== undefined && result !== null;
+              const correctAnswer = problem.solution || problem.answer || '';
               
               return (
                 <div
@@ -96,9 +99,11 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
                       Problem #{index + 1}
                     </Badge>
                     <div className="flex items-center gap-2">
-                      <Badge variant={getDifficultyVariant(difficulty)} className="text-xs">
-                        {difficulty.toUpperCase()}
-                      </Badge>
+                      {problem.subject && (
+                        <Badge variant="outline" className="text-xs capitalize">
+                          {problem.subject}
+                        </Badge>
+                      )}
                       {isChecked && (
                         result ? (
                           <Check className="h-5 w-5 text-green-600" />
@@ -128,7 +133,7 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
                       />
                       <Button
                         size="sm"
-                        onClick={() => checkAnswer(index, problem.answer)}
+                        onClick={() => checkAnswer(index, problem)}
                         disabled={isChecked || !userAnswers[index]?.trim()}
                         className="shrink-0"
                       >
@@ -137,9 +142,17 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
                     </div>
                     
                     {result === false && (
-                      <div className="rounded-lg bg-accent/10 border border-accent/20 p-3 animate-fade-in">
-                        <p className="text-xs font-semibold text-muted-foreground mb-1">Correct answer:</p>
-                        <p className="text-sm text-foreground font-medium">{problem.answer}</p>
+                      <div className="rounded-lg bg-accent/10 border border-accent/20 p-3 animate-fade-in space-y-2">
+                        <div>
+                          <p className="text-xs font-semibold text-muted-foreground mb-1">Correct answer:</p>
+                          <p className="text-sm text-foreground font-medium">{correctAnswer}</p>
+                        </div>
+                        {problem.steps && (
+                          <div>
+                            <p className="text-xs font-semibold text-muted-foreground mb-1">Explanation:</p>
+                            <p className="text-sm text-muted-foreground">{problem.steps}</p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
