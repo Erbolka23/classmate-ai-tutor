@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Target, Filter, History, BookOpen } from "lucide-react";
-import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -117,11 +116,7 @@ const Practice = () => {
 
           {/* Recommended Practice Tab */}
           <TabsContent value="recommended">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="animate-fade-in">
               <div className="grid lg:grid-cols-[280px_1fr] gap-8">
                 {/* Filters Sidebar */}
                 <aside className="space-y-6">
@@ -219,58 +214,47 @@ const Practice = () => {
                     </Card>
                   ) : (
                     <div className="grid gap-4">
-                      {problems.map((problem, index) => (
-                        <motion.div
+                      {problems.map((problem) => (
+                        <Card
                           key={problem.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: index * 0.05, duration: 0.3 }}
+                          className="p-6 rounded-2xl hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-primary/30 animate-fade-in"
+                          onClick={() => navigate(`/practice/${problem.id}`)}
                         >
-                          <Card
-                            className="p-6 rounded-2xl hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-primary/30"
-                            onClick={() => navigate(`/practice/${problem.id}`)}
-                          >
-                            <div className="flex items-start justify-between gap-4 mb-3">
-                              <h3 className="text-lg font-semibold text-foreground flex-1">
-                                {problem.title}
-                              </h3>
-                              <Badge variant="outline" className="capitalize">
-                                {problem.subject}
-                              </Badge>
-                            </div>
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <h3 className="text-lg font-semibold text-foreground flex-1">
+                              {problem.title}
+                            </h3>
+                            <Badge variant="outline" className="capitalize">
+                              {problem.subject}
+                            </Badge>
+                          </div>
 
-                            <p className="text-muted-foreground mb-4 line-clamp-2">
-                              {problem.statement}
-                            </p>
+                          <p className="text-muted-foreground mb-4 line-clamp-2">
+                            {problem.statement}
+                          </p>
 
-                            <div className="flex items-center gap-3">
-                              <Badge className={getDifficultyColor(problem.difficulty)}>
-                                {problem.difficulty.toUpperCase()}
-                              </Badge>
-                              <span className="text-sm font-medium text-muted-foreground">
-                                Rating: {problem.rating}
-                              </span>
-                            </div>
-                          </Card>
-                        </motion.div>
+                          <div className="flex items-center gap-3">
+                            <Badge className={getDifficultyColor(problem.difficulty)}>
+                              {problem.difficulty.toUpperCase()}
+                            </Badge>
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Rating: {problem.rating}
+                            </span>
+                          </div>
+                        </Card>
                       ))}
                     </div>
                   )}
                 </div>
               </div>
-            </motion.div>
+            </div>
           </TabsContent>
 
           {/* Your Recent Problems Tab */}
           <TabsContent value="recent">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="max-w-4xl mx-auto"
-            >
+            <div className="max-w-4xl mx-auto animate-fade-in">
               <RecentProblemsTab />
-            </motion.div>
+            </div>
           </TabsContent>
         </Tabs>
       </main>
