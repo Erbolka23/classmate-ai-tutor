@@ -172,6 +172,33 @@ export type Database = {
           },
         ]
       }
+      user_recent_queries: {
+        Row: {
+          created_at: string | null
+          id: string
+          original_problem: string
+          simplified_problem: string | null
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          original_problem: string
+          simplified_problem?: string | null
+          subject: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          original_problem?: string
+          simplified_problem?: string | null
+          subject?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       leaderboard_view: {

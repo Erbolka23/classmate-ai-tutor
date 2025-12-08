@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Target, Filter } from "lucide-react";
+import { Target, Filter, History, BookOpen } from "lucide-react";
+import { motion } from "framer-motion";
 import { NavBar } from "@/components/NavBar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RecentProblemsTab } from "@/components/practice/RecentProblemsTab";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,6 +28,7 @@ const Practice = () => {
   const { toast } = useToast();
   const [problems, setProblems] = useState<Problem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("recommended");
   
   // Filters
   const [subjectFilter, setSubjectFilter] = useState<string>("all");
@@ -32,8 +36,10 @@ const Practice = () => {
   const [ratingRange, setRatingRange] = useState<number[]>([800, 2400]);
 
   useEffect(() => {
-    loadProblems();
-  }, [subjectFilter, difficultyFilter, ratingRange]);
+    if (activeTab === "recommended") {
+      loadProblems();
+    }
+  }, [subjectFilter, difficultyFilter, ratingRange, activeTab]);
 
   const loadProblems = async () => {
     setIsLoading(true);
@@ -96,136 +102,177 @@ const Practice = () => {
           <p className="text-muted-foreground text-lg">Solve problems to improve your rating</p>
         </div>
 
-        <div className="grid lg:grid-cols-[280px_1fr] gap-8">
-          {/* Filters Sidebar */}
-          <aside className="space-y-6">
-            <Card className="p-6 rounded-2xl shadow-lg border-2">
-              <div className="flex items-center gap-2 mb-6">
-                <Filter className="h-5 w-5 text-primary" />
-                <h2 className="text-xl font-bold text-foreground">Filters</h2>
-              </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8 h-12">
+            <TabsTrigger value="recommended" className="gap-2 text-sm sm:text-base">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Recommended</span> Practice
+            </TabsTrigger>
+            <TabsTrigger value="recent" className="gap-2 text-sm sm:text-base">
+              <History className="h-4 w-4" />
+              <span className="hidden sm:inline">Your</span> Recent Problems
+            </TabsTrigger>
+          </TabsList>
 
-              <div className="space-y-6">
-                {/* Subject Filter */}
-                <div className="space-y-2">
-                  <Label>Subject</Label>
-                  <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Subjects</SelectItem>
-                      <SelectItem value="math">Math</SelectItem>
-                      <SelectItem value="physics">Physics</SelectItem>
-                      <SelectItem value="programming">Programming</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Difficulty Filter */}
-                <div className="space-y-2">
-                  <Label>Difficulty</Label>
-                  <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Difficulties</SelectItem>
-                      <SelectItem value="easy">Easy</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="hard">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Rating Range */}
-                <div className="space-y-3">
-                  <Label>Rating Range</Label>
-                  <div className="px-2">
-                    <Slider
-                      min={800}
-                      max={2400}
-                      step={100}
-                      value={ratingRange}
-                      onValueChange={setRatingRange}
-                      className="mb-2"
-                    />
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <span>{ratingRange[0]}</span>
-                    <span>{ratingRange[1]}</span>
-                  </div>
-                </div>
-
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setSubjectFilter("all");
-                    setDifficultyFilter("all");
-                    setRatingRange([800, 2400]);
-                  }}
-                >
-                  Reset Filters
-                </Button>
-              </div>
-            </Card>
-          </aside>
-
-          {/* Problems List */}
-          <div>
-            {isLoading ? (
-              <div className="grid gap-4">
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="p-6 animate-pulse">
-                    <div className="h-6 bg-muted rounded w-3/4 mb-4" />
-                    <div className="h-4 bg-muted rounded w-1/2" />
-                  </Card>
-                ))}
-              </div>
-            ) : problems.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Target className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">No Problems Found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Try adjusting your filters or check back later.
-                </p>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {problems.map((problem) => (
-                  <Card
-                    key={problem.id}
-                    className="p-6 rounded-2xl hover-lift active-press cursor-pointer shadow-md"
-                    onClick={() => navigate(`/practice/${problem.id}`)}
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <h3 className="text-lg font-semibold text-foreground flex-1">
-                        {problem.title}
-                      </h3>
-                      <Badge variant="outline" className="capitalize">
-                        {problem.subject}
-                      </Badge>
+          {/* Recommended Practice Tab */}
+          <TabsContent value="recommended">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="grid lg:grid-cols-[280px_1fr] gap-8">
+                {/* Filters Sidebar */}
+                <aside className="space-y-6">
+                  <Card className="p-6 rounded-2xl shadow-lg border-2">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Filter className="h-5 w-5 text-primary" />
+                      <h2 className="text-xl font-bold text-foreground">Filters</h2>
                     </div>
 
-                    <p className="text-muted-foreground mb-4 line-clamp-2">
-                      {problem.statement}
-                    </p>
+                    <div className="space-y-6">
+                      {/* Subject Filter */}
+                      <div className="space-y-2">
+                        <Label>Subject</Label>
+                        <Select value={subjectFilter} onValueChange={setSubjectFilter}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Subjects</SelectItem>
+                            <SelectItem value="math">Math</SelectItem>
+                            <SelectItem value="physics">Physics</SelectItem>
+                            <SelectItem value="programming">Programming</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                    <div className="flex items-center gap-3">
-                      <Badge className={getDifficultyColor(problem.difficulty)}>
-                        {problem.difficulty.toUpperCase()}
-                      </Badge>
-                      <span className="text-sm font-medium text-muted-foreground">
-                        Rating: {problem.rating}
-                      </span>
+                      {/* Difficulty Filter */}
+                      <div className="space-y-2">
+                        <Label>Difficulty</Label>
+                        <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All Difficulties</SelectItem>
+                            <SelectItem value="easy">Easy</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="hard">Hard</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Rating Range */}
+                      <div className="space-y-3">
+                        <Label>Rating Range</Label>
+                        <div className="px-2">
+                          <Slider
+                            min={800}
+                            max={2400}
+                            step={100}
+                            value={ratingRange}
+                            onValueChange={setRatingRange}
+                            className="mb-2"
+                          />
+                        </div>
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>{ratingRange[0]}</span>
+                          <span>{ratingRange[1]}</span>
+                        </div>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => {
+                          setSubjectFilter("all");
+                          setDifficultyFilter("all");
+                          setRatingRange([800, 2400]);
+                        }}
+                      >
+                        Reset Filters
+                      </Button>
                     </div>
                   </Card>
-                ))}
+                </aside>
+
+                {/* Problems List */}
+                <div>
+                  {isLoading ? (
+                    <div className="grid gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Card key={i} className="p-6 animate-pulse">
+                          <div className="h-6 bg-muted rounded w-3/4 mb-4" />
+                          <div className="h-4 bg-muted rounded w-1/2" />
+                        </Card>
+                      ))}
+                    </div>
+                  ) : problems.length === 0 ? (
+                    <Card className="p-12 text-center">
+                      <Target className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+                      <h3 className="text-xl font-semibold text-foreground mb-2">No Problems Found</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Try adjusting your filters or check back later.
+                      </p>
+                    </Card>
+                  ) : (
+                    <div className="grid gap-4">
+                      {problems.map((problem, index) => (
+                        <motion.div
+                          key={problem.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05, duration: 0.3 }}
+                        >
+                          <Card
+                            className="p-6 rounded-2xl hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-primary/30"
+                            onClick={() => navigate(`/practice/${problem.id}`)}
+                          >
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <h3 className="text-lg font-semibold text-foreground flex-1">
+                                {problem.title}
+                              </h3>
+                              <Badge variant="outline" className="capitalize">
+                                {problem.subject}
+                              </Badge>
+                            </div>
+
+                            <p className="text-muted-foreground mb-4 line-clamp-2">
+                              {problem.statement}
+                            </p>
+
+                            <div className="flex items-center gap-3">
+                              <Badge className={getDifficultyColor(problem.difficulty)}>
+                                {problem.difficulty.toUpperCase()}
+                              </Badge>
+                              <span className="text-sm font-medium text-muted-foreground">
+                                Rating: {problem.rating}
+                              </span>
+                            </div>
+                          </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
-        </div>
+            </motion.div>
+          </TabsContent>
+
+          {/* Your Recent Problems Tab */}
+          <TabsContent value="recent">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-4xl mx-auto"
+            >
+              <RecentProblemsTab />
+            </motion.div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
