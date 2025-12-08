@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { BookOpen, Sparkles, Lightbulb, Moon, Sun } from "lucide-react";
 import { SubjectSelector } from "@/components/SubjectSelector";
-import { ProblemInput } from "@/components/ProblemInput";
+import { MathInput } from "@/components/MathInput";
 import { ExplanationDisplay } from "@/components/ExplanationDisplay";
 import { SimilarProblemsDisplay } from "@/components/SimilarProblemsDisplay";
 import { ExplanationSkeleton } from "@/components/ExplanationSkeleton";
@@ -207,7 +207,7 @@ const Index = () => {
             <div className="rounded-2xl bg-card p-6 sm:p-8 shadow-[var(--shadow-card)]">
               <div className="space-y-5">
                 <SubjectSelector value={subject} onChange={setSubject} />
-                <ProblemInput value={problemText} onChange={setProblemText} />
+                <MathInput value={problemText} onChange={setProblemText} />
                 
                 <div className="flex flex-wrap gap-3">
                   <Button 
