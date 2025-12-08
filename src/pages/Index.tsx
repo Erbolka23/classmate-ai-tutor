@@ -242,7 +242,7 @@ const Index = () => {
 
             {/* Similar Problems Display */}
             {similarProblems.length > 0 && (
-              <SimilarProblemsDisplay problems={similarProblems} />
+              <SimilarProblemsDisplay problems={similarProblems} originalProblem={problemText} />
             )}
 
             {/* Empty State */}

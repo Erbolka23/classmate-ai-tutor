@@ -31,6 +31,7 @@ export const RecentProblemsTab = () => {
   const [similarProblems, setSimilarProblems] = useState<SimilarProblem[]>([]);
   const [isLoadingSimilar, setIsLoadingSimilar] = useState(false);
   const [showSimilarModal, setShowSimilarModal] = useState(false);
+  const [currentQueryProblem, setCurrentQueryProblem] = useState<string>('');
 
   useEffect(() => {
     loadRecentQueries();
@@ -75,6 +76,7 @@ export const RecentProblemsTab = () => {
     setIsLoadingSimilar(true);
     setShowSimilarModal(true);
     setSimilarProblems([]);
+    setCurrentQueryProblem(query.original_problem);
 
     try {
       const { data, error } = await supabase.functions.invoke('similar', {
@@ -234,7 +236,7 @@ export const RecentProblemsTab = () => {
               ))}
             </div>
           ) : similarProblems.length > 0 ? (
-            <SimilarProblemsDisplay problems={similarProblems} />
+            <SimilarProblemsDisplay problems={similarProblems} originalProblem={currentQueryProblem} />
           ) : (
             <p className="text-center text-muted-foreground py-8">
               No similar problems generated.
