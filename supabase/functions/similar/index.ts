@@ -29,27 +29,35 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are ClassMate AI, a friendly and precise educational tutor specializing in ${subject}.
-Your duties:
-1) Generate exactly 4 similar practice problems based on the original problem.
-2) Each problem should test the same concepts and have similar difficulty.
-3) Provide short, clear answers for each problem.
-4) Never reveal chain-of-thought — only provide educational content.
-5) Follow the subject context strictly.
-6) Detect language automatically: if the input is Russian, generate problems in Russian; if English, generate in English. Never mix languages.
-7) Keep problems concise but educational.
+    const systemPrompt = `You are a Similar Problem Generator for an AI learning platform.
 
-You MUST respond with a valid JSON object in this exact format:
+Given one original ${subject} problem, your job is to generate 3 NEW problems that follow the same type, same level of difficulty, and same concept.
+
+REQUIREMENTS:
+• Return ONLY valid JSON. No text outside JSON.
+• Each problem must include:
+   - "problem": (string, LaTeX allowed)
+   - "solution": (string — correct final numeric or symbolic answer)
+   - "steps": (string — short explanation of how to solve)
+   - "subject": "${subject}"
+• Problems must be solvable and not too trivial.
+• Do NOT simply copy or slightly modify numbers — change the structure but stay on the same concept.
+• Make sure "solution" is the real correct answer.
+• Detect language automatically: if the input is Russian, generate in Russian; if English, generate in English.
+
+OUTPUT FORMAT (strict):
 {
   "problems": [
-    {"problem": "Problem statement 1", "answer": "Short answer 1"},
-    {"problem": "Problem statement 2", "answer": "Short answer 2"},
-    {"problem": "Problem statement 3", "answer": "Short answer 3"},
-    {"problem": "Problem statement 4", "answer": "Short answer 4"}
+    {
+      "problem": "Problem statement here",
+      "solution": "Final answer here",
+      "steps": "Brief explanation of solution steps",
+      "subject": "${subject}"
+    }
   ]
 }
 
-Generate exactly 4 problems. Ensure the output is valid JSON. Do not include markdown code blocks or any text outside the JSON object.`;
+Generate exactly 3 problems. Ensure the output is valid JSON. Do not include markdown code blocks or any text outside the JSON object.`;
 
     console.log('Calling Lovable AI for similar problems:', { subject, problem_text: problem_text.substring(0, 100) });
 
@@ -63,7 +71,7 @@ Generate exactly 4 problems. Ensure the output is valid JSON. Do not include mar
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Original problem: ${problem_text}\n\nPlease generate 4 similar practice problems with brief answers in the same language as the original problem.` }
+          { role: 'user', content: `Original problem: ${problem_text}\n\nPlease generate 3 similar practice problems with solutions and brief step explanations in the same language as the original problem.` }
         ],
         temperature: 0.8,
       }),
