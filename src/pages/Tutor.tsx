@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
 import { NavBar } from "@/components/NavBar";
 import { SubjectSelector } from "@/components/SubjectSelector";
-import { ProblemInput } from "@/components/ProblemInput";
+import { MathInput } from "@/components/MathInput";
 import { ExplanationDisplay } from "@/components/ExplanationDisplay";
 import { ExplanationSkeleton } from "@/components/ExplanationSkeleton";
 import { RatingPopup } from "@/components/RatingPopup";
@@ -178,7 +178,7 @@ const Tutor = () => {
           <div className="rounded-3xl bg-card p-6 sm:p-8 shadow-elevated border-2">
             <div className="space-y-5">
               <SubjectSelector value={subject} onChange={setSubject} />
-              <ProblemInput value={problemText} onChange={setProblemText} />
+              <MathInput value={problemText} onChange={setProblemText} />
               
               <Button 
                 onClick={handleExplain}
