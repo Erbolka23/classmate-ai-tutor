@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { Lightbulb, Check, X, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
 
 interface SimilarProblemsDisplayProps {
   problems: {
@@ -11,6 +12,7 @@ interface SimilarProblemsDisplayProps {
     answer: string;
     difficulty?: string;
   }[];
+  originalProblem?: string;
 }
 
 const getDifficultyVariant = (difficulty?: string): "default" | "secondary" | "destructive" => {
@@ -19,27 +21,48 @@ const getDifficultyVariant = (difficulty?: string): "default" | "secondary" | "d
   return 'secondary';
 };
 
-export const SimilarProblemsDisplay = ({ problems }: SimilarProblemsDisplayProps) => {
-  const [expandedIndices, setExpandedIndices] = useState<Set<number>>(new Set());
+const normalizeAnswer = (answer: string): string => {
+  return answer
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '')
+    .replace(/,/g, '.');
+};
 
-  const toggleAnswer = (index: number) => {
-    setExpandedIndices(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(index)) {
-        newSet.delete(index);
-      } else {
-        newSet.add(index);
-      }
-      return newSet;
+export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarProblemsDisplayProps) => {
+  const navigate = useNavigate();
+  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [results, setResults] = useState<Record<number, boolean | null>>({});
+  const [checkedCount, setCheckedCount] = useState(0);
+
+  const handleAnswerChange = (index: number, value: string) => {
+    setUserAnswers(prev => ({ ...prev, [index]: value }));
+  };
+
+  const checkAnswer = (index: number, correctAnswer: string) => {
+    const userAnswer = userAnswers[index] || '';
+    const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(correctAnswer);
+    
+    setResults(prev => {
+      const newResults = { ...prev, [index]: isCorrect };
+      // Count how many have been checked
+      const checked = Object.values(newResults).filter(v => v !== null).length;
+      setCheckedCount(checked);
+      return newResults;
     });
   };
 
+  const correctCount = Object.values(results).filter(r => r === true).length;
+  const incorrectCount = Object.values(results).filter(r => r === false).length;
+  const allChecked = checkedCount === problems.length;
+  const hasIncorrect = incorrectCount > 0;
+
+  const handlePracticeAgain = () => {
+    navigate('/tutor', { state: { preload: originalProblem } });
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-    >
+    <div className="space-y-4 animate-fade-in">
       <Card className="border-border bg-card shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-hover)] transition-shadow rounded-2xl">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-3">
@@ -52,65 +75,112 @@ export const SimilarProblemsDisplay = ({ problems }: SimilarProblemsDisplayProps
         <CardContent>
           <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
             {problems.map((problem, index) => {
-              const isExpanded = expandedIndices.has(index);
+              const result = results[index];
               const difficulty = problem.difficulty || 'medium';
+              const isChecked = result !== undefined && result !== null;
               
               return (
-                <motion.div
+                <div
                   key={index}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group rounded-xl border border-border bg-white dark:bg-neutral-800 p-5 transition-all hover:border-primary/40 hover:shadow-[var(--shadow-hover)] cursor-pointer"
+                  className={`group rounded-xl border p-5 transition-all hover:shadow-[var(--shadow-hover)] ${
+                    result === true 
+                      ? 'border-green-500/50 bg-green-50 dark:bg-green-950/20' 
+                      : result === false 
+                        ? 'border-red-500/50 bg-red-50 dark:bg-red-950/20'
+                        : 'border-border bg-card hover:border-primary/40'
+                  }`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
                     <Badge variant="secondary" className="text-xs font-semibold">
-                      Practice Problem #{index + 1}
+                      Problem #{index + 1}
                     </Badge>
-                    <Badge variant={getDifficultyVariant(difficulty)} className="text-xs">
-                      {difficulty.toUpperCase()}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getDifficultyVariant(difficulty)} className="text-xs">
+                        {difficulty.toUpperCase()}
+                      </Badge>
+                      {isChecked && (
+                        result ? (
+                          <Check className="h-5 w-5 text-green-600" />
+                        ) : (
+                          <X className="h-5 w-5 text-red-600" />
+                        )
+                      )}
+                    </div>
                   </div>
+                  
                   <p className="mb-4 text-sm text-foreground leading-relaxed">{problem.problem}</p>
                   
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleAnswer(index)}
-                    className="w-full justify-between group-hover:border-primary/40 transition-colors"
-                  >
-                    <span className="text-xs font-semibold">
-                      {isExpanded ? 'Hide Answer' : 'Show Answer'}
-                    </span>
-                    {isExpanded ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                  </Button>
-                  
-                  <AnimatePresence>
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
+                  <div className="space-y-3">
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Your answer..."
+                        value={userAnswers[index] || ''}
+                        onChange={(e) => handleAnswerChange(index, e.target.value)}
+                        disabled={isChecked}
+                        className={`flex-1 ${
+                          result === true 
+                            ? 'border-green-500 bg-green-50 dark:bg-green-950/30' 
+                            : result === false 
+                              ? 'border-red-500 bg-red-50 dark:bg-red-950/30'
+                              : ''
+                        }`}
+                      />
+                      <Button
+                        size="sm"
+                        onClick={() => checkAnswer(index, problem.answer)}
+                        disabled={isChecked || !userAnswers[index]?.trim()}
+                        className="shrink-0"
                       >
-                        <div className="mt-3 rounded-lg bg-accent/5 border border-accent/20 p-3">
-                          <p className="text-xs font-semibold text-accent mb-1.5">Answer:</p>
-                          <p className="text-sm text-foreground leading-relaxed">{problem.answer}</p>
-                        </div>
-                      </motion.div>
+                        Check
+                      </Button>
+                    </div>
+                    
+                    {result === false && (
+                      <div className="rounded-lg bg-accent/10 border border-accent/20 p-3 animate-fade-in">
+                        <p className="text-xs font-semibold text-muted-foreground mb-1">Correct answer:</p>
+                        <p className="text-sm text-foreground font-medium">{problem.answer}</p>
+                      </div>
                     )}
-                  </AnimatePresence>
-                </motion.div>
+                  </div>
+                </div>
               );
             })}
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+
+      {/* Summary Section */}
+      {allChecked && (
+        <Card className="border-border bg-card rounded-2xl animate-fade-in">
+          <CardContent className="p-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-center sm:text-left">
+                <p className="text-lg font-semibold text-foreground">
+                  {correctCount}/{problems.length} correct
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {correctCount === problems.length 
+                    ? "Perfect! You've mastered this concept!" 
+                    : hasIncorrect 
+                      ? "Keep practicing to improve!" 
+                      : "Great work!"}
+                </p>
+              </div>
+              
+              {hasIncorrect && originalProblem && (
+                <Button
+                  onClick={handlePracticeAgain}
+                  className="gap-2"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Practice Again
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
