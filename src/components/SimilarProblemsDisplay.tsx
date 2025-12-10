@@ -137,27 +137,21 @@ export const SimilarProblemsDisplay = ({ problems, originalProblem }: SimilarPro
                         disabled={isChecked || !userAnswers[index]?.trim()}
                         className="shrink-0"
                       >
-                        Check My Answer
+                        Check Answer
                       </Button>
                     </div>
 
-                    {/* Success Message */}
+                    {/* Correct */}
                     {result === true && (
-                      <div className="mt-2 p-3 bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 rounded-xl shadow-sm animate-fade-in border border-green-200 dark:border-green-800">
-                        Correct! 🎉 Great job!
+                      <div className="mt-2 p-3 bg-green-100 dark:bg-green-950/40 text-green-700 dark:text-green-400 rounded-xl animate-fade-in font-medium">
+                        ✓ Correct
                       </div>
                     )}
                     
-                    {/* Error Message */}
+                    {/* Incorrect */}
                     {result === false && (
-                      <div className="mt-2 p-3 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 rounded-xl shadow-sm animate-fade-in border border-red-200 dark:border-red-800 space-y-2">
-                        <p>Incorrect. The correct answer is: <strong>{correctAnswer}</strong></p>
-                        {problem.steps && (
-                          <div className="pt-2 border-t border-red-200 dark:border-red-800">
-                            <p className="text-xs font-semibold mb-1">Explanation:</p>
-                            <p className="text-sm opacity-90">{problem.steps}</p>
-                          </div>
-                        )}
+                      <div className="mt-2 p-3 bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 rounded-xl animate-fade-in font-medium">
+                        ✗ Incorrect
                       </div>
                     )}
                   </div>
